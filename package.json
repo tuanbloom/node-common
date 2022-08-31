@@ -14,7 +14,7 @@
     "node": ">=16.0"
   },
   "scripts": {
-    "build": "rimraf dist coverage && tsc",
+    "build": "rimraf dist coverage && tsc -p tsconfig.build.json",
     "test": "jest --coverage",
     "lint": "eslint ./src/ --ext .ts",
     "lint:fix": "eslint ./src/ --ext .ts --fix"
