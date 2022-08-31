@@ -95,7 +95,7 @@ export class HttpClient<TContext = never> {
     }
 
     // strip sensitive request data for logging
-    const { headers: finalHeaders, body, ...loggableRequestData } = request
+    const { headers: finalHeaders, body: _, ...loggableRequestData } = request
     const logRequestInfo = {
       baseUrl,
       url,

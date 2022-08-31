@@ -54,8 +54,7 @@ export const getClientCredentialsToken = async ({
   if (!response.ok) throw new FetchResponseError(response, 'Request for client_credentials failed')
 
   const data = (await response.json()) as AccessTokenResponseData
-  if (!data.access_token)
-    throw new FetchResponseError(response, 'No access_token was returned from client_credentials request')
+  if (!data.access_token) throw new FetchResponseError(response, 'No access_token was returned from client_credentials request')
 
   return new AccessTokenResponse(data)
 }
@@ -86,24 +85,20 @@ export const getOnBehalfOfToken = async ({
   if (!response.ok) throw new FetchResponseError(response, 'Request for on-behalf-of failed')
 
   const data = (await response.json()) as AccessTokenResponseData
-  if (!data.access_token)
-    throw new FetchResponseError(response, 'No access_token was returned from on-behalf-of request')
+  if (!data.access_token) throw new FetchResponseError(response, 'No access_token was returned from on-behalf-of request')
 
   return new AccessTokenResponse(data)
 }
 
 const base64Encode = (value: string): string => Buffer.from(value, 'utf-8').toString('base64')
 
-export const getBasicAuthHeader = (username: string, password: string): string =>
-  `Basic ${base64Encode(`${username}:${password}`)}`
+export const getBasicAuthHeader = (username: string, password: string): string => `Basic ${base64Encode(`${username}:${password}`)}`
 
 export type AuthHeaders = Record<string, string>
 export type Context = Record<string, string>
 export type HttpAuthFactory<TContext = never> = (context: TContext) => Promise<AuthHeaders>
 
-export const createClientCredentialsAuthFactory = (
-  clientCredentialsConfig: ClientCredentialsConfig,
-): HttpAuthFactory => {
+export const createClientCredentialsAuthFactory = (clientCredentialsConfig: ClientCredentialsConfig): HttpAuthFactory => {
   let promise: Promise<AccessTokenResponse> | undefined
   return async () => {
     if (!promise) promise = getClientCredentialsToken(clientCredentialsConfig)
@@ -119,7 +114,7 @@ export const createClientCredentialsAuthFactory = (
 }
 
 export const createOnBehalfOfAuthFactory = (
-  onBehalfOfConfig: Omit<OnBehalfOfConfig, 'assertionToken'>,
+  onBehalfOfConfig: Omit<OnBehalfOfConfig, 'assertionToken'>
 ): HttpAuthFactory<{ assertionToken: string }> => {
   return async ({ assertionToken }) => {
     const config: OnBehalfOfConfig = { assertionToken, ...onBehalfOfConfig }
