@@ -15,9 +15,11 @@ interface AccessTokenResponseData {
 export class AccessTokenResponse {
   constructor({ access_token, expires_in }: AccessTokenResponseData) {
     this.access_token = access_token
+    this.expires_in = expires_in
     this.expires = new Date(Date.now() + expires_in * 1000)
   }
   readonly access_token: string
+  readonly expires_in: number
   readonly expires: Date
   get isExpired(): boolean {
     return Date.now() >= this.expires.getTime()
