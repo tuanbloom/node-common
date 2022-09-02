@@ -1,16 +1,42 @@
 import { randomUUID } from 'crypto'
 import omit from 'lodash.omit'
 import fetch, { RequestInit, Response } from 'node-fetch'
-import { join } from 'path'
-import { HttpAuthFactory } from './authorization'
+import { AuthHeaders, HttpAuthFactory } from './authorization'
 import { Logger } from './logger'
 
 export class HttpResponseError extends Error {
-  constructor(response: Response) {
-    super(`HTTP Error: ${response.status} ${response.statusText}`)
-    this.response = response
+  constructor(responseInfo: LoggableHttpResponseInfo, message?: string) {
+    super(`${message ?? 'HTTP Error'}: ${responseInfo.status} ${responseInfo.statusText}`)
   }
-  public response: Response
+  public responseInfo?: LoggableHttpResponseInfo
+
+  public static create = async (response: Response, message?: string): Promise<HttpResponseError> => {
+    const error = new HttpResponseError(response, message)
+    error.responseInfo = await extractErrorResponseInfo(response)
+    return error
+  }
+}
+
+export type LoggableHttpResponseInfo = Pick<Response, 'status' | 'statusText'> & {
+  responseText?: string
+  responseJson?: unknown
+}
+
+export const extractErrorResponseInfo = async (response: Response): Promise<LoggableHttpResponseInfo> => {
+  const info: LoggableHttpResponseInfo = {
+    status: response.status,
+    statusText: response.statusText,
+  }
+  try {
+    info.responseJson = await response.json()
+  } catch {
+    try {
+      info.responseText = await response.text()
+    } catch {
+      /* ignore */
+    }
+  }
+  return info
 }
 
 export interface HttpClientOptions<TContext = never> {
@@ -71,14 +97,24 @@ export class HttpClient<TContext = never> {
     return this.request<T>(url, { data: options?.data, init: { ...options?.init, method: 'DELETE' } })
   }
 
-  private async request<T>(url: string, { data, init }: { data?: unknown; init?: RequestInit }): Promise<T> {
+  public async request<T>(url: string, args: { data?: unknown; init?: RequestInit }): Promise<T> {
+    const response = await this.requestRaw(url, args)
+    return (await response.json()) as T
+  }
+
+  public async requestRaw(url: string, { data, init }: { data?: unknown; init?: RequestInit }): Promise<Response> {
     const { baseUrl, authFactory, requestContext, correlationId, headers: baseHeaders, logger, service } = this.options
 
     // compose URL
-    const combinedUrl = typeof baseUrl == 'string' ? join(baseUrl, url) : url
+    const combinedUrl = typeof baseUrl === 'string' ? new URL(url, baseUrl).href : url
 
     // compose headers
-    const authHeaders = authFactory ? await authFactory(requestContext as TContext) : {}
+    let authHeaders: AuthHeaders | undefined = undefined
+    try {
+      authHeaders = authFactory ? await authFactory(requestContext as TContext) : {}
+    } catch (error) {
+      logger?.error('Authentication via authFactory failed', { error })
+    }
     const headers: Record<string, string> = {
       'X-Request-ID': randomUUID(),
       ...baseHeaders,
@@ -95,7 +131,7 @@ export class HttpClient<TContext = never> {
     }
 
     // strip sensitive request data for logging
-    const { headers: finalHeaders, body: _, ...loggableRequestData } = request
+    const { headers: finalHeaders, body, ...loggableRequestData } = request
     const logRequestInfo = {
       baseUrl,
       url,
@@ -106,14 +142,8 @@ export class HttpClient<TContext = never> {
     const started = Date.now()
     try {
       const response = await fetch(combinedUrl, request)
-      if (!response.ok) throw new HttpResponseError(response)
-      const json = (await response.json()) as T
-      logger?.verbose('HTTP request', {
-        duration: Date.now() - started,
-        serviceName: service,
-        request: logRequestInfo,
-      })
-      return json
+      if (!response.ok) throw await HttpResponseError.create(response)
+      return response
     } catch (error) {
       logger?.error('HTTP request failed', {
         duration: Date.now() - started,
