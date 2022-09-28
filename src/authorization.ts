@@ -1,11 +1,5 @@
-import fetch, { Response } from 'node-fetch'
-export class FetchResponseError extends Error {
-  constructor(response: Response, message?: string) {
-    super(message)
-    this.response = response
-  }
-  public response: Response
-}
+import fetch from 'node-fetch'
+import { HttpResponseError } from './http'
 
 interface AccessTokenResponseData {
   access_token: string
@@ -53,10 +47,10 @@ export const getClientCredentialsToken = async ({
     }),
   })
 
-  if (!response.ok) throw new FetchResponseError(response, 'Request for client_credentials failed')
+  if (!response.ok) throw await HttpResponseError.create(response, 'Request for client_credentials failed')
 
   const data = (await response.json()) as AccessTokenResponseData
-  if (!data.access_token) throw new FetchResponseError(response, 'No access_token was returned from client_credentials request')
+  if (!data.access_token) throw new HttpResponseError(response, 'No access_token was returned from client_credentials request')
 
   return new AccessTokenResponse(data)
 }
@@ -84,10 +78,10 @@ export const getOnBehalfOfToken = async ({
     }),
   })
 
-  if (!response.ok) throw new FetchResponseError(response, 'Request for on-behalf-of failed')
+  if (!response.ok) throw await HttpResponseError.create(response, 'Request for on-behalf-of failed')
 
   const data = (await response.json()) as AccessTokenResponseData
-  if (!data.access_token) throw new FetchResponseError(response, 'No access_token was returned from on-behalf-of request')
+  if (!data.access_token) throw new HttpResponseError(response, 'No access_token was returned from on-behalf-of request')
 
   return new AccessTokenResponse(data)
 }

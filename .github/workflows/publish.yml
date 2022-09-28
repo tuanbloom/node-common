@@ -1,17 +1,21 @@
-name: Pull Request
+name: Publish
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches:
+      - main
     paths-ignore:
       - '**/*.md'
 
 permissions:
   contents: read
-  packages: read
+  packages: write
 
 jobs:
-  pull_request:
+  ci:
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
       testScript: npm run test:ci
+  publish:
+    needs: ci
+    uses: makerxstudio/shared-config/.github/workflows/node-publish-internal.yml@main
