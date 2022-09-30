@@ -8,6 +8,5 @@ updates:
       interval: 'weekly'
     ignore:
       - dependency-name: 'node-fetch'
-        # We do not want to upgdate node-fetch to v3.* because it is esm-only
-        # We do want v2.* (cjs) updates
+        # node-fetch v3.* is esm-only
         versions: ['3.x']
