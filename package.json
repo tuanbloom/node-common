@@ -24,15 +24,15 @@
   },
   "dependencies": {
     "lodash.omit": "^4.5.0",
-    "node-fetch": "^3.2.10"
+    "node-fetch": "^2.6.7"
   },
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
-    "@types/jest": "^29.1.0",
+    "@types/jest": "^29.1.1",
     "@types/lodash.omit": "^4.5.7",
     "@types/node-fetch": "^2.6.2",
-    "@typescript-eslint/eslint-plugin": "^5.38.1",
-    "@typescript-eslint/parser": "^5.38.1",
+    "@typescript-eslint/eslint-plugin": "^5.39.0",
+    "@typescript-eslint/parser": "^5.39.0",
     "eslint": "8.24.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-node": "^11.1.0",
