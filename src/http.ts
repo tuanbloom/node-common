@@ -116,42 +116,78 @@ export class HttpClient<TContext = never> {
       logger?.error('Authentication via authFactory failed', { error })
     }
     const headers: Record<string, string> = {
-      'X-Request-ID': randomUUID(),
       ...baseHeaders,
       ...authHeaders,
     }
     if (correlationId) headers['X-Correlation-ID'] = correlationId
-    if (!(data instanceof URLSearchParams)) headers['Content-Type'] = 'application/json'
 
-    // compose request
-    const request: RequestInit = {
-      ...init,
-      headers: { ...init?.headers, ...headers },
-      body: data ? JSON.stringify(data) : undefined,
-    }
+    return makeHttpRequest({
+      init,
+      method: init?.method ?? 'GET',
+      url: combinedUrl,
+      headers,
+      contentType: data instanceof URLSearchParams ? 'application/x-www-form-urlencoded' : 'application/json',
+      logger,
+      ensureSuccessStatusCode: true,
+      data,
+      logContext: { service },
+    })
+  }
+}
 
-    // strip sensitive request data for logging
-    const { headers: finalHeaders, body, ...loggableRequestData } = request
-    const logRequestInfo = {
-      baseUrl,
-      url,
-      ...loggableRequestData,
-      headers: omit(finalHeaders, 'authorization', 'x-api-key', 'X-API-Key'),
-    }
+export type HttpRequestOptions = {
+  url: string
+  method: string
+  data?: unknown
+  headers?: Record<string, string>
+  contentType?: string
+  accept?: string
+  logger?: Logger
+  init?: Partial<RequestInit>
+  logContext?: Record<string, unknown>
+  ensureSuccessStatusCode?: boolean
+}
 
-    const started = Date.now()
-    try {
-      const response = await fetch(combinedUrl, request)
-      if (!response.ok) throw await HttpResponseError.create(response)
-      return response
-    } catch (error) {
-      logger?.error('HTTP request failed', {
-        duration: Date.now() - started,
-        service,
-        request: logRequestInfo,
-        error,
-      })
-      throw error
-    }
+export async function makeHttpRequest({
+  url,
+  contentType = 'application/json',
+  accept,
+  ensureSuccessStatusCode = true,
+  method,
+  data,
+  headers,
+  logger,
+  logContext,
+  init,
+}: HttpRequestOptions) {
+  // compose request
+  const request: RequestInit = {
+    ...init,
+    method,
+    headers: { ...headers, 'X-Request-ID': randomUUID(), 'Content-Type': contentType, ...(accept && { Accept: accept }) },
+    body: data ? JSON.stringify(data) : undefined,
+  }
+
+  // strip sensitive request data for logging
+  const { headers: finalHeaders, body, ...loggableRequestData } = request
+  const logRequestInfo = {
+    url,
+    ...loggableRequestData,
+    headers: omit(finalHeaders, 'authorization', 'x-api-key', 'X-API-Key'),
+  }
+
+  const started = Date.now()
+  try {
+    const response = await fetch(url, request)
+    if (!response.ok && ensureSuccessStatusCode) throw await HttpResponseError.create(response)
+    return response
+  } catch (error) {
+    logger?.error('HTTP request failed', {
+      duration: Date.now() - started,
+      ...logContext,
+      request: logRequestInfo,
+      error,
+    })
+    throw error
   }
 }
