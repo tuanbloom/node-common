@@ -122,7 +122,7 @@ export class HttpClient<TContext = never> {
     if (correlationId) headers['X-Correlation-ID'] = correlationId
 
     return makeHttpRequest({
-      init,
+      fetchInit: init,
       method: init?.method ?? 'GET',
       url: combinedUrl,
       headers,
@@ -136,15 +136,51 @@ export class HttpClient<TContext = never> {
 }
 
 export type HttpRequestOptions = {
+  /**
+   * The full url of the resource to fetch
+   */
   url: string
+  /**
+   * The http method to use with the request
+   */
   method: string
+  /**
+   * A data object to be sent in the request body
+   */
   data?: unknown
+  /**
+   * Any additional headers to be sent with the request
+   */
   headers?: Record<string, string>
+  /**
+   * A value for the http 'Content-Type' header.
+   * THe default is 'application/json'
+   */
   contentType?: string
+  /**
+   * A value for the http 'Accept'' header
+   */
   accept?: string
+  /**
+   * A logger instance to be used to log requests and errors
+   */
   logger?: Logger
-  init?: Partial<RequestInit>
+  /**
+   * Any additional values to be set on the fetch RequestInit object
+   */
+  fetchInit?: Partial<Omit<RequestInit, 'method' | 'body' | 'headers'>>
+  /**
+   * Any additional properties to append to log messages
+   */
   logContext?: Record<string, unknown>
+  /**
+   * The level to log all http requests before they are sent.
+   * The default is 'none' (ie. don't log)
+   */
+  requestLogLevel?: 'none' | keyof Logger
+  /**
+   * If true, will throw an exception for none 2xx status code responses
+   */
   ensureSuccessStatusCode?: boolean
 }
 
@@ -158,11 +194,12 @@ export async function makeHttpRequest({
   headers,
   logger,
   logContext,
-  init,
+  requestLogLevel = 'none',
+  fetchInit,
 }: HttpRequestOptions) {
   // compose request
   const request: RequestInit = {
-    ...init,
+    ...fetchInit,
     method,
     headers: { ...headers, 'X-Request-ID': randomUUID(), 'Content-Type': contentType, ...(accept && { Accept: accept }) },
     body: data ? JSON.stringify(data) : undefined,
@@ -175,8 +212,16 @@ export async function makeHttpRequest({
     ...loggableRequestData,
     headers: omit(finalHeaders, 'authorization', 'x-api-key', 'X-API-Key'),
   }
-
   const started = Date.now()
+
+  if (requestLogLevel !== 'none') {
+    logger?.[requestLogLevel]('HTTP request', {
+      started,
+      ...logContext,
+      request: logRequestInfo,
+    })
+  }
+
   try {
     const response = await fetch(url, request)
     if (!response.ok && ensureSuccessStatusCode) throw await HttpResponseError.create(response)

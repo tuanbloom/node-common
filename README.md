@@ -109,6 +109,43 @@ export const createServices = (context: BaseContext): Services => {
 }
 ```
 
+### makeHttpRequest
+
+If the `HttpClient` class is too opinionated for your use case, or you simply want a stateless wrapper for the fetch api with some sensible defaults; we export the function `makeHttpRequest` which is what `HttpClient` uses internally. This function takes care of request logging but leaves request encoding and response decoding to the consumer which offers a higher degree of flexibility.
+
+```ts
+import { makeHttpRequest } from "./http";
+
+const usersResponse = await makeHttpRequest({
+  url: 'https://localhost:8080/api/users',
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer abc123def'
+  },
+  ensureSuccessStatusCode: false,
+  logger: myLogger,
+  requestLogLovel: 'debug',
+  logContext: {
+    service: 'My Service Name',
+    version: '1.0.0'
+  },
+  accept: 'application/json',
+  fetchInit: {
+    redirect: 'manual'
+  }
+})
+
+if(usersResponse.ok) {
+  const users = await usersResponse.json()
+} else if(usersResponse.status === 302) {
+  const redirectLocation = usersResponse.headers.get('location')
+} else {
+  // Do something with error code???
+}
+
+
+```
+
 ### HttpResponseError
 
 A custom Error class which includes a `responseInfo` field to make investigating HTTP errors (via logs etc) a little easier.
