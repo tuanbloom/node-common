@@ -1,6 +1,6 @@
 {
   "name": "@makerxstudio/node-common",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "private": false,
   "description": "A set of MakerX core NodeJS types and utilities",
   "author": "MakerX",
@@ -15,8 +15,9 @@
     "build": "run-s build:*",
     "build:0-clean": "rimraf dist coverage",
     "build:1-compile": "tsc -p tsconfig.build.json",
-    "build:2-copy-pkg-json": "npx --yes @makerx/ts-toolkit copy-package-json",
+    "build:2-copy-pkg-json": "npx --yes @makerx/ts-toolkit@latest copy-package-json",
     "test": "jest --coverage --coverageReporters=text",
+    "npm:link": "npm link ./dist",
     "lint": "eslint ./src/ --ext .ts",
     "lint:fix": "eslint ./src/ --ext .ts --fix",
     "check-types": "tsc --noEmit",
