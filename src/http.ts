@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto'
-import omit from 'lodash.omit'
 import fetch, { RequestInit, Response } from 'node-fetch'
 import { AuthHeaders, HttpAuthFactory } from './authorization'
 import { Logger } from './logger'
@@ -182,6 +181,11 @@ export type HttpRequestOptions = {
    * If true, will throw an exception for none 2xx status code responses
    */
   ensureSuccessStatusCode?: boolean
+  /**
+   * An array of headers that should be considered sensitive and as such, omitted from the logs
+   * The default values are 'Authorization' and 'X-API-Key'
+   */
+  sensitiveHeaders?: string[]
 }
 
 export async function makeHttpRequest({
@@ -196,6 +200,7 @@ export async function makeHttpRequest({
   logContext,
   requestLogLevel = 'none',
   fetchInit,
+  sensitiveHeaders = ['Authorization', 'X-API-Key'],
 }: HttpRequestOptions) {
   // compose request
   const request: RequestInit = {
@@ -210,7 +215,11 @@ export async function makeHttpRequest({
   const logRequestInfo = {
     url,
     ...loggableRequestData,
-    headers: omit(finalHeaders, 'authorization', 'x-api-key', 'X-API-Key'),
+    headers: Object.fromEntries(
+      Object.entries(finalHeaders as Record<string, string>).filter(([header]) =>
+        sensitiveHeaders.every((sh) => header.localeCompare(sh, undefined, { sensitivity: 'base' }) !== 0)
+      )
+    ),
   }
   const started = Date.now()
 
