@@ -6,8 +6,9 @@ import { Logger } from './logger'
 export class HttpResponseError extends Error {
   constructor(responseInfo: LoggableHttpResponseInfo, message?: string) {
     super(`${message ?? 'HTTP Error'}: ${responseInfo.status} ${responseInfo.statusText}`)
+    this.responseInfo = responseInfo
   }
-  public responseInfo?: LoggableHttpResponseInfo
+  public responseInfo: LoggableHttpResponseInfo
 
   public static create = async (response: Response, message?: string): Promise<HttpResponseError> => {
     const error = new HttpResponseError(response, message)
@@ -178,6 +179,16 @@ export type HttpRequestOptions = {
    */
   requestLogLevel?: 'none' | keyof Logger
   /**
+   * The level to log all successful responses.
+   * The default is 'verbose'
+   */
+  successResponseLogLevel?: 'none' | keyof Logger
+  /**
+   * The level to log all unsuccessful responses.
+   * The default is 'error'
+   */
+  errorResponseLogLevel?: 'none' | keyof Logger
+  /**
    * If true, will throw an exception for none 2xx status code responses
    */
   ensureSuccessStatusCode?: boolean
@@ -199,6 +210,8 @@ export async function makeHttpRequest({
   logger,
   logContext,
   requestLogLevel = 'none',
+  successResponseLogLevel = 'verbose',
+  errorResponseLogLevel = 'error',
   fetchInit,
   sensitiveHeaders = ['Authorization', 'X-API-Key'],
 }: HttpRequestOptions) {
@@ -234,14 +247,25 @@ export async function makeHttpRequest({
   try {
     const response = await fetch(url, request)
     if (!response.ok && ensureSuccessStatusCode) throw await HttpResponseError.create(response)
+    if (successResponseLogLevel !== 'none') {
+      logger?.[successResponseLogLevel]('HTTP response', {
+        duration: Date.now() - started,
+        statusCode: response.status,
+        statusText: response.statusText,
+        ...logContext,
+        request: logRequestInfo,
+      })
+    }
     return response
   } catch (error) {
-    logger?.error('HTTP request failed', {
-      duration: Date.now() - started,
-      ...logContext,
-      request: logRequestInfo,
-      error,
-    })
+    if (errorResponseLogLevel !== 'none') {
+      logger?.[errorResponseLogLevel]('HTTP request failed', {
+        duration: Date.now() - started,
+        ...logContext,
+        request: logRequestInfo,
+        error,
+      })
+    }
     throw error
   }
 }
