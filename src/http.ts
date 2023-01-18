@@ -219,7 +219,12 @@ export async function makeHttpRequest({
   const request: RequestInit = {
     ...fetchInit,
     method,
-    headers: { ...headers, 'X-Request-ID': randomUUID(), 'Content-Type': contentType, ...(accept && { Accept: accept }) },
+    headers: {
+      ...headers,
+      'X-Request-ID': randomUUID(),
+      ...(contentType && { 'Content-Type': contentType }),
+      ...(accept && { Accept: accept }),
+    },
     body: data ? JSON.stringify(data) : undefined,
   }
 
