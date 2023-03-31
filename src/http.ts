@@ -225,7 +225,7 @@ export async function makeHttpRequest({
       ...(contentType && { 'Content-Type': contentType }),
       ...(accept && { Accept: accept }),
     },
-    body: data ? JSON.stringify(data) : undefined,
+    body: data instanceof URLSearchParams ? data : data ? JSON.stringify(data) : undefined,
   }
 
   // strip sensitive request data for logging
