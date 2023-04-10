@@ -17,7 +17,7 @@ export type DefaultOpaqueTypes = Date | Array<any>
 export type PropertyPaths<T, TOpaque = DefaultOpaqueTypes, D extends number = 10> = [D] extends [never]
   ? never
   : T extends object
-  ? T extends TOpaque
+  ? [T, TOpaque] extends [TOpaque, T]
     ? ''
     : {
         [K in keyof T]-?: K extends string | number
