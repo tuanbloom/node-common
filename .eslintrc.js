@@ -25,5 +25,6 @@ module.exports = {
     'node/no-unsupported-features/es-syntax': ['error', { ignores: ['modules'] }],
     '@typescript-eslint/restrict-template-expressions': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
+    '@typescript-eslint/no-explicit-any': 'off',
   },
 }

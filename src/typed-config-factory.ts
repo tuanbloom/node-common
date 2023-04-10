@@ -1,23 +1,29 @@
-type ExtractValue<TKey, TConfig> = TKey extends keyof TConfig
+export type ValueFromPropertyPath<TKey, TConfig> = TKey extends keyof TConfig
   ? TConfig[TKey]
   : TKey extends `${infer TFirst}.${infer TRest}`
   ? TFirst extends keyof TConfig
-    ? ExtractValue<TRest, TConfig[TFirst]>
+    ? ValueFromPropertyPath<TRest, TConfig[TFirst]>
     : never
   : never
 
-export type TypedConfig<TConfig extends object> = {
-  get<TPath extends Paths<TConfig>>(path: TPath): ExtractValue<TPath, TConfig>
-  has<TPath extends Paths<TConfig>>(path: TPath): boolean
+export type TypedConfig<TConfig extends object, TOpaque> = {
+  get<TPath extends PropertyPaths<TConfig, TOpaque>>(path: TPath): ValueFromPropertyPath<TPath, TConfig>
+  has<TPath extends PropertyPaths<TConfig, TOpaque>>(path: TPath): boolean
 }
 
-type Join<K, P> = K extends string | number ? (P extends string | number ? `${K}${'' extends P ? '' : '.'}${P}` : never) : never
-type Paths<T, D extends number = 10> = [D] extends [never]
+export type JoinPaths<K, P> = K extends string | number ? (P extends string | number ? `${K}${'' extends P ? '' : '.'}${P}` : never) : never
+export type DefaultOpaqueTypes = Date | Array<any>
+
+export type PropertyPaths<T, TOpaque = DefaultOpaqueTypes, D extends number = 10> = [D] extends [never]
   ? never
   : T extends object
-  ? {
-      [K in keyof T]-?: K extends string | number ? `${K}` | (Paths<T[K], Prev[D]> extends infer R ? Join<K, R> : never) : never
-    }[keyof T]
+  ? T extends TOpaque
+    ? ''
+    : {
+        [K in keyof T]-?: K extends string | number
+          ? `${K}` | (PropertyPaths<T[K], TOpaque, Prev[D]> extends infer R ? JoinPaths<K, R> : never)
+          : never
+      }[keyof T]
   : ''
 
 type Prev = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, ...0[]]
@@ -38,6 +44,29 @@ type Prev = [never, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
  *
  * const val = typedConfig.get('mySetting')
  * ```
+ *
+ * Optionally specify opaque types:
+ *
+ * Sub properties of an opaque type will not be expanded. This can improve editor performance when dealing with complex types when you
+ * would never need to access a sub property directly from config.
+ *
+ * usage:
+ * ```
+ * import config from 'config'
+ *
+ * type MyConfig {
+ *   msalConfig: MsalConfiguration
+ * }
+ *
+ * const typedConfig1 = createTypedConfig<MyConfig>(config)
+ * typedConfig1.has('msalConfig.system') ✅
+ * const typedConfig2 = createTypedConfig<MyConfig, MsalConfiguration | DefaultOpaqueTypes>(config)
+ * typedConfig2.has('msalConfig.system') ❌
+ * typedConfig2.has('msalConfig') ✅
+ *
+ * ```
  */
-export const createTypedConfig = <TConfig extends object>(config: { get(path: string): unknown; has(path: string): boolean }) =>
-  config as TypedConfig<TConfig>
+export const createTypedConfig = <TConfig extends object, TOpaqueTypes = DefaultOpaqueTypes>(config: {
+  get(path: string): unknown
+  has(path: string): boolean
+}) => config as TypedConfig<TConfig, TOpaqueTypes>
