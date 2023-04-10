@@ -1,6 +1,6 @@
 {
   "name": "@makerxstudio/node-common",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "private": false,
   "description": "A set of MakerX core NodeJS types and utilities",
   "author": "MakerX",
