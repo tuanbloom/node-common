@@ -1,6 +1,6 @@
 {
   "name": "@makerxstudio/node-common",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": false,
   "description": "A set of MakerX core NodeJS types and utilities",
   "author": "MakerX",
@@ -24,7 +24,6 @@
     "audit": "npm audit"
   },
   "dependencies": {
-    "lodash.omit": "^4.5.0",
     "node-fetch": "^2.6.9"
   },
   "devDependencies": {
