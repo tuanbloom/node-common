@@ -5,7 +5,7 @@ describe('Distinct', () => {
     it('Returns only the distinct items', () => {
       const list = ['a', 'a', 'a', 'b', 'b', 'c']
 
-      const distinctList = list.filter(distinct((x) => x))
+      const distinctList = list.filter(distinct())
 
       expect(distinctList).toStrictEqual(['a', 'b', 'c'])
     })
