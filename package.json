@@ -1,13 +1,10 @@
 {
-  "name": "@makerxstudio/node-common",
+  "name": "@makerx/node-common",
   "version": "0.4.0",
   "private": false,
   "description": "A set of MakerX core NodeJS types and utilities",
   "author": "MakerX",
   "license": "MIT",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "engines": {
     "node": ">=16.0"
   },

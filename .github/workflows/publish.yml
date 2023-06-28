@@ -16,4 +16,4 @@ jobs:
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
   publish:
     needs: ci
-    uses: makerxstudio/shared-config/.github/workflows/node-publish-internal.yml@main
+    uses: makerxstudio/shared-config/.github/workflows/node-publish-public.yml@main
