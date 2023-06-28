@@ -229,6 +229,8 @@ export async function makeHttpRequest({
   }
 
   // strip sensitive request data for logging
+  // Disable because in the new node-fetch, formData has type any
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { headers: finalHeaders, body, ...loggableRequestData } = request
   const logRequestInfo = {
     url,
