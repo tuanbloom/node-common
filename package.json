@@ -1,12 +1,20 @@
 {
   "name": "@makerx/node-common",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": false,
   "description": "A set of MakerX core NodeJS types and utilities",
   "author": "MakerX",
   "license": "MIT",
   "engines": {
     "node": ">=16.0"
+  },
+  "bugs": {
+    "url": "https://github.com/MakerXStudio/node-common/issues"
+  },
+  "homepage": "https://github.com/MakerXStudio/node-common#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MakerXStudio/node-common.git"
   },
   "scripts": {
     "build": "run-s build:*",
