@@ -1,13 +1,10 @@
 {
-  "name": "@makerxstudio/node-common",
-  "version": "0.4.0",
+  "name": "@makerx/node-common",
+  "version": "1.0.0",
   "private": false,
   "description": "A set of MakerX core NodeJS types and utilities",
   "author": "MakerX",
   "license": "MIT",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "engines": {
     "node": ">=16.0"
   },
@@ -21,29 +18,33 @@
     "lint": "eslint ./src/ --ext .ts",
     "lint:fix": "eslint ./src/ --ext .ts --fix",
     "check-types": "tsc --noEmit",
-    "audit": "npm audit"
+    "audit": "better-npm-audit audit"
   },
   "dependencies": {
-    "node-fetch": "^2.6.9"
+    "node-fetch": "^2.6.11"
   },
   "devDependencies": {
-    "@tsconfig/node16": "^1.0.3",
-    "@types/jest": "^29.5.0",
+    "@tsconfig/node16": "^1.0.4",
+    "@types/jest": "^29.5.2",
+    "@types/node-fetch": "^2.6.4",
     "@types/lodash.omit": "^4.5.7",
-    "@types/node-fetch": "^2.6.3",
-    "@typescript-eslint/eslint-plugin": "^5.58.0",
-    "@typescript-eslint/parser": "^5.58.0",
-    "eslint": "8.38.0",
+    "@typescript-eslint/eslint-plugin": "^5.60.1",
+    "@typescript-eslint/parser": "^5.60.1",
+    "better-npm-audit": "^3.7.3",
+    "eslint": "8.43.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.2.1",
     "jest-date": "^1.1.6",
-    "jest-junit": "^15.0.0",
+    "jest-junit": "^16.0.0",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.8.7",
-    "rimraf": "^5.0.0",
+    "prettier": "^2.8.8",
+    "rimraf": "^5.0.1",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.4"
+    "typescript": "^5.1.5"
+  },
+  "overrides": {
+    "semver": "^7.5.3"
   }
 }
