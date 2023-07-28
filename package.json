@@ -1,9 +1,10 @@
 {
   "name": "@tuanbloom/node-common",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": false,
   "description": "A set of MakerX core NodeJS types and utilities",
   "author": "MakerX",
+  "main": "dist/index.d.ts",
   "license": "MIT",
   "engines": {
     "node": ">=16.0"
