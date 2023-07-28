@@ -34,7 +34,7 @@
     "node-fetch": "^2.6.11"
   },
   "devDependencies": {
-    "@tsconfig/node16": "^1.0.4",
+    "@tsconfig/node16": "^16.1.0",
     "@types/jest": "^29.5.2",
     "@types/lodash.omit": "^4.5.7",
     "@types/node-fetch": "^2.6.4",
