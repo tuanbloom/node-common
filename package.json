@@ -33,7 +33,7 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "node-fetch": "^2.6.11"
+    "node-fetch": "^2.6.12"
   },
   "devDependencies": {
     "@tsconfig/node16": "^1.0.4",
